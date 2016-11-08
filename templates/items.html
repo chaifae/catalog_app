@@ -1,0 +1,27 @@
+{% extends "main.html" %}
+{% block content %}
+
+{% if items !=[] %}
+    {% for i in items %}
+        <div class="item">
+            <h3>{{i.name}}<span class="price">${{i.price}}</span></h3>
+            <p>{{i.description}}</p>
+            <span class="category">{{i.category}}</span>
+            <span class="creator">Created by {{i.user.name}}</span>
+            {% if loggedin %}
+                <a href="{{url_for('editItem', item_id = i.id)}}">Edit</a>
+                <a href="{{url_for('deleteItem', item_id = i.id)}}">Delete</a>
+            {% endif %}
+        </div>
+    {% endfor %}
+{% else %}
+    <p>There isn't anything here yet!</p>
+{% endif %}
+
+{% if loggedin %}
+<a href="{{url_for('newItem')}}">
+    <button class="btn btn-default">Create an Item</button>
+</a>
+{% endif %}
+
+{% endblock %}

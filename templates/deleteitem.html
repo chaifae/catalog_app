@@ -1,0 +1,20 @@
+{% extends "main.html" %}
+{% block content %}
+
+{% if authorized %}
+<h2>Are you sure you want to delete {{item.name}}? You won't be able to undo this.</h2>
+
+<form action="#" method="POST">
+    <button type="submit" class="btn btn-default" id="sumbit" type="submit">I'm sure, delete this item!</button>
+</form>
+<a href="{{url_for('catalog')}}">
+    <button class="btn btn-default">Nevermind, I've changed my mind!</button>
+</a>
+{% else %}
+<h2>You are unauthorized to delete this item. Please only delete items you have created.</h2>
+<a href="{{url_for('showCategory', category = item.category)}}">
+    <button class="btn btn-default">Take me back</button>
+</a>
+{% endif %}
+
+{% endblock %}

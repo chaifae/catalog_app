@@ -1,0 +1,12 @@
+{% extends "main.html" %}
+{% block content %}
+
+<p>Browse the catalog by selecting a category from the left. If you are logged in, you can create an item.</p>
+
+{% if loggedin %}
+<a href="{{url_for('newItem')}}">
+    <button class="btn btn-default">Create an Item</button>
+</a>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,132 @@
+{% extends "main.html" %}
+{% block content %}
+<!-- load the pre-requisites for google sign in -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+<script src="https://apis.google.com/js/client:platform.js?onload=start"></script>
+
+
+<h2>Log in</h2>
+
+
+<!-- google plus sign in -->
+<div id="signinButton">
+    <span class="g-signin"
+          data-scope="openid email"
+          data-clientid="683721057258-vos2igqui38kit4fhclad7uj2mmmg7mp.apps.googleusercontent.com"
+          data-redirecturi="postmessage"
+          data-accesstype="offline"
+          data-cookiepolicy="single_host_origin"
+          data-callback="signInCallback"
+          data-approvalprompt="force">
+    </span>
+</div>
+<script>
+    // google plus sign-in
+    function signInCallback(authResult) {
+        if (authResult['code']) {
+            // hide the sign in button now that user is authorized
+            console.log("authResult['code'] = " + authResult['code']);
+            $('#signinButton').attr('style', 'display: none');
+            // send the one-time code to the server
+            // if server responds, write a 'login success' message to the webpage and then redirect back to the homepage
+            var ajax_print = {
+                type: 'POST',
+                url: '/gconnect?state={{STATE}}',
+                processData: false,
+                data: JSON.stringify(authResult['code']),
+                contentType: 'application/octet-stream; charset=utf-8',
+                success: function(result) {
+                    // handle or verify the server response
+                    if (result) {
+                        $('#result').html('Login Successful!</br>' + result + '</br>Redirecting...')
+                        setTimeout(function() {
+                            window.location.href = '/';
+                        }, 2000);
+                    } else if (authResult['error']) {
+                        console.log('There was an error: ' + authResult['error']);
+                    } else {
+                        $('#result').html('Failed to make a server-side call. Check your configuration and console.');
+                    }
+                }
+            };
+            console.log(ajax_print);
+            $.ajax({
+                type: 'POST',
+                url: '/gconnect?state={{STATE}}',
+                processData: false,
+                data: authResult['code'],
+                contentType: 'application/octet-stream; charset=utf-8',
+                success: function(result) {
+                    // handle or verify server response
+                    if (result) {
+                        $('#result').html('Login Successful!</br>' + result + '</br>Redirecting...')
+                        setTimeout(function() {
+                            window.location.href = '/';
+                        }, 2000);
+                    } else if (authResult['error']) {
+                        console.log('There was an error: ' + authResult['error']);
+                    } else {
+                        $('#result').html('Failed to make a server-side call. Check your configuration and console.');
+                    }
+                }
+            });
+        }
+    }
+    // end google plus sign-in
+</script>
+<!-- facebook sign-in -->
+<div id="fb-root"></div>
+<button>
+    <fb:login-button scope="public_profile,email" onlogin="sendTokenToServer();">
+        <a href="javascript:sendTokenToServer()">Login with Facebook</a>
+    </fb:login-button>
+</button>
+<script>
+    // facebook sign-in
+    window.fbAsyncInit = function() {
+        FB.init({
+            appId: '122680858182000',
+            cookie: true, // enable cookies to allow server to access session
+            xfbml: true, // parse social plugins on this page
+            version: 'v2.4'
+        });
+    };
+    // load the SDK asynchronously
+    (function(d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) return;
+        js = d.createElement(s);
+        js.id = id;
+        js.src = '//connect.facebook.net/en_US/sdk.js';
+        fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
+    // test the Graph API after login successful
+    function sendTokenToServer() {
+        var access_token = FB.getAuthResponse()['accessToken'];
+        console.log('Fetching information...');
+        console.log(access_token);
+        FB.api('/me', function(response) {
+            console.log('Successful login for: ' + response.name);
+            $.ajax({
+                type: 'POST',
+                url: '/fbconnect?state={{STATE}}',
+                processData: false,
+                data: access_token,
+                contentType: 'application/octet-stream; charset=utf-8',
+                success: function(result) {
+                    // handle or verify server response
+                    if (result) {
+                        $('#result').html('Login successful!</br>' + result + '</br>Redirecting...')
+                        setTimeout(function() {
+                            window.location.href = '/';
+                        }, 2000);
+                    } else {
+                        $('#result').html('Failed to make a server-side call. Check your configuration and console.');
+                    }
+                }
+            });
+        });
+    }
+</script>
+<div class="result"></div>
+{% endblock %}

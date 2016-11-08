@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+       <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    </head>
+    <body>
+        <div class="container">
+            <div class="row page-header">
+                <div class="col-md-8">
+                    <h1>Art Supplies Catalog</h1>
+                </div>
+                <div class="col-md-4">
+                    {% if 'username' not in session %}
+                        <a href="{{url_for('showLogin')}}">Log in</a>
+                    {% else %}
+                        <img src="{{session.image}}" class="user-image">
+                        <p>Logged in as<br>{{session.username}}</p>
+                        <a href="{{url_for('disconnect')}}">Log Out</a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="flash">
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        <ul>
+                            {% for message in messages %}
+                                <li><strong> {{ message }} </strong></li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                {% endwith %}
+            </div>
+            <div class="row page-content">
+                <div class="col-md-3 page-side">
+                    <ul class="category-list">
+                        <li><a href="{{url_for('showCategory', category = 'Paints')}}">Paints</a></li>
+                        <li><a href="{{url_for('showCategory', category = 'Canvas')}}">Canvas</a></li>
+                        <li><a href="{{url_for('showCategory', category = 'Paper')}}">Paper</a></li>
+                        <li><a href="{{url_for('showCategory', category = 'Pencils')}}">Pencils</a></li>
+                        <li><a href="{{url_for('showCategory', category = 'Pens')}}">Pens</a></li>
+                        <li><a href="{{url_for('showCategory', category = 'Brushes')}}">Brushes</a></li>
+                        <li><a href="{{url_for('showCategory', category = 'Embellishments')}}">Embellishments</a></li>
+                        <li><a href="{{url_for('showCategory', category = 'Books')}}">Books</a></li>
+                        <li><a href="{{url_for('showCategory', category = 'Sets')}}">Sets</a></li>
+                        <li><a href="{{url_for('showCategory', category = 'Misc')}}">Misc</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-9 page-fill">
+                    {% block content %}
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

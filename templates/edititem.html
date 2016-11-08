@@ -1,0 +1,39 @@
+{% extends "main.html" %}
+{% block content %}
+
+{% if authorized %}
+<h1>Edit Item</h1>
+<form action="#" method="POST">
+    <div class="form-group">
+        <label for="name">Name:</label>
+        <input type="text" maxlength="50" class="form-control" name="name" value="{{item.name}}">
+        <label for="description">Description:</label>
+        <textarea class="form-control" maxlength="250" rows="3" name="description">{{item.description}}</textarea>
+        <label for="price">Price:</label>
+        <input type="text" class="form-control" maxlength="10" name="price" value="{{item.price}}">
+        <label for="category">Category:</label>
+        <select name="category">
+            <option name="category" value="Paints" {% if item.category == 'Paints' %} selected {% endif %}>Paints</option>
+            <option name="category" value="Canvas" {% if item.category == 'Canvas' %} selected {% endif %}>Canvas</option>
+            <option name="category" value="Paper" {% if item.category == 'Paper' %} selected {% endif %}>Paper</option>
+            <option name="category" value="Pencils" {% if item.category == 'Pencils' %} selected {% endif %}>Pencils</option>
+            <option name="category" value="Pens" {% if item.category == 'Pens' %} selected {% endif %}>Pens</option>
+            <option name="category" value="Brushes" {% if item.category == 'Brushes' %} selected {% endif %}>Brushes</option>
+            <option name="category" value="Embellishments" {% if item.category == 'Embellishments' %} selected {% endif %}>Embellishments</option>
+            <option name="category" value="Books" {% if item.category == 'Books' %} selected {% endif %}>Books</option>
+            <option name="category" value="Sets" {% if item.category == 'Sets' %} selected {% endif %}>Sets</option>
+            <option name="category" value="Misc" {% if item.category == 'Misc' %} selected {% endif %}>Misc</option>
+        </select>
+        <button type="submit" class="btn btn-default" id="submit" type="submit">Save</button>
+    </div>
+</form>
+<a href="{{url_for('showCategory', category = item.category)}}">
+    <button class="btn btn-default">Cancel</button>
+</a>
+{% else %}
+<h2>You are unauthorized to edit this item. Please only edit items you have created.</h2>
+<a href="{{url_for('showCategory', category = item.category)}}">
+    <button class="btn btn-default">Take me back</button>
+</a>
+{% endif %}
+{% endblock %}
