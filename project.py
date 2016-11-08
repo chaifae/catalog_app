@@ -320,20 +320,25 @@ def disconnect():
 		redirect(url_for('catalog'))
 
 
-#JSON APIs to view item information #ADD OPTION TO SORT BY CATEGORY?
+#JSON APIs to view item information
 @app.route('/catalog/JSON/')
-def categoryListJSON(): #REQUIRES TESTING
+def categoryListJSON():
 	# returns list of categories
 	categories = session.query(Item.category).distinct()
 	return jsonify(categories = [c.serialize for c in categories])
 
 
 @app.route('/catalog/items/JSON/')
-def itemsJSON(): #REQUIRES TESTING
+def itemsJSON():
 	# returns list of all items
 	items = session.query(Item).all()
 	return jsonify(items = [i.serialize for i in items])
 
+@app.route('/catalog/<string:category>/items/JSON')
+def itemsByCategoryJSON(category):
+	# returns list of items within a single category
+	items = session.query(Item).filter_by(category = category).all()
+	return jsonify(items = [i.serialize for i in items])
 
 @app.route('/catalog/items/<int:item_id>/JSON/')
 def itemJSON(item_id):
