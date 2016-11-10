@@ -9,8 +9,8 @@
             <span class="category">{{i.category}}</span>
             <span class="creator">Created by {{i.user.name}}</span>
             {% if loggedin %}
-                <a href="{{url_for('editItem', item_id = i.id)}}">Edit</a>
-                <a href="{{url_for('deleteItem', item_id = i.id)}}">Delete</a>
+                <a href="{{url_for('editItem', item_id = i.id)}}" class="edit">Edit</a>
+                <a href="{{url_for('deleteItem', item_id = i.id)}}" class="delete">Delete</a>
             {% endif %}
         </div>
     {% endfor %}

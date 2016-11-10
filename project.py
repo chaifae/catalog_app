@@ -21,56 +21,66 @@ session = DBSession()
 
 @app.route('/')
 @app.route('/catalog/')
-def catalog(): #REQUIRES TESTING
-	# homepage, lists all the categories
+def catalog():
+	# landing page, will show slightly different content depending on if user is logged in
+	# start by assuming user not logged in
 	loggedin = False
+	# if username is in login_session, we can assume a user is logged in and pass that info to the template
 	if 'username' in login_session:
 		loggedin = True
 	return render_template('catalog.html', loggedin = loggedin)
 
 
 @app.route('/catalog/<string:category>/')
-def showCategory(category): #REQUIRES UPDATING
-	# landing page for category selected, displays all items in selected category
+def showCategory(category):
+	# landing page for the category selected, displays all items in selected category
+	# will show slightly different content depending on if user is logged in
+	# start by assuming user not logged in
 	loggedin = False
+	# grab all the items within the category selected
 	items = session.query(Item).filter_by(category = category).all()
-	users = session.query(User).all()
+	# if username is in login_session, we can assume a user is logged in and pass that info to the template
 	if 'username' in login_session:
 		loggedin = True
 	return render_template('items.html', items = items, category = category, loggedin = loggedin)
 
 
 @app.route('/catalog/newitem/', methods = ['GET', 'POST'])
-def newItem(): #REQUIRES TESTING
-	# check if user is logged in, redirect if needed
+def newItem():
+	# check if user is logged in, redirect if not
 	if 'username' not in login_session:
 		return redirect('/login/')
 	# user is logged in, continue to new item page
 	if request.method == 'POST':
+		# grab all the input from the form for the new item
 		newItem = Item(name = request.form['name'],
 					   description = request.form['description'],
 					   price = request.form['price'],
 					   category = request.form['category'],
 					   user_id = login_session['user_id'])
 		session.add(newItem)
+		# flash a message to confirm item creation
 		flash('New item %s successfully created!' % (newItem.name))
 		session.commit()
+		# redirect to the category landing page of the newly created item
 		return redirect(url_for('showCategory', category = newItem.category))
 	else:
 		return render_template('newitem.html')
 
 
 @app.route('/catalog/<int:item_id>/edit/', methods = ['GET', 'POST'])
-def editItem(item_id): #REQUIRES TESTING
-	# check if user is logged in, redirect if needed
+def editItem(item_id):
+	# check if user is logged in, redirect if not
+	# start by assuming the user is not the authorized creator of the item
 	authorized = False
 	if 'username' not in login_session:
 		return redirect('/login/')
+	# user is logged in so we can continue, grab item by id
 	editedItem = session.query(Item).filter_by(id = item_id).one()
-	# check if user logged in is creator, alert if not
+	# check if user logged in is creator
+	# page will display differently if not
 	if editedItem.user_id == login_session['user_id']:
 		authorized = True
-	# user logged in is creator, send to edit item page
 	if request.method == 'POST':
 		if request.form['name']:
 			editedItem.name = request.form['name']
@@ -81,26 +91,31 @@ def editItem(item_id): #REQUIRES TESTING
 		if request.form['category']:
 			editedItem.category = request.form['category']
 		session.add(editedItem)
+		# flash a message to confirm item edit successful
 		flash('%s successfully edited!' % (editedItem.name))
 		session.commit()
+		# redirect to the category landing page of the edited item
 		return redirect(url_for('showCategory', category = editedItem.category))
 	else:
 		return render_template('edititem.html', item_id = item_id, item = editedItem, authorized = authorized)
 
 
 @app.route('/catalog/<int:item_id>/delete/', methods = ['GET', 'POST'])
-def deleteItem(item_id): #REQUIRES TESTING
-	# check if user is logged in, redirect if needed
+def deleteItem(item_id):
+	# check if user is logged in, redirect if not
+	# start by assuming the user is not the authorized creator
 	authorized = False
 	if 'username' not in login_session:
 		return redirect('/login/')
+	# user is logged in, we can continue
 	itemToDelete = session.query(Item).filter_by(id = item_id).one()
-	# check if user logged in is creator, alert if not
+	# check if user logged in is creator, page will display differently if not
 	if itemToDelete.user_id == login_session['user_id']:
 		authorized = True
 	if request.method == 'POST':
 		session.delete(itemToDelete)
 		session.commit()
+		# flash a message to confirm item deletion successful
 		flash('Item successfully deleted.')
 		return redirect(url_for('catalog'))
 	else:
@@ -336,7 +351,7 @@ def itemsJSON():
 
 @app.route('/catalog/<string:category>/items/JSON')
 def itemsByCategoryJSON(category):
-	# returns list of items within a single category
+	# returns list of items within the given category
 	items = session.query(Item).filter_by(category = category).all()
 	return jsonify(items = [i.serialize for i in items])
 

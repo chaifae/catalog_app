@@ -32,19 +32,17 @@
                 {% endwith %}
             </div>
             <div class="row page-content">
-                <div class="col-md-3 page-side">
-                    <ul class="category-list">
-                        <li><a href="{{url_for('showCategory', category = 'Paints')}}">Paints</a></li>
-                        <li><a href="{{url_for('showCategory', category = 'Canvas')}}">Canvas</a></li>
-                        <li><a href="{{url_for('showCategory', category = 'Paper')}}">Paper</a></li>
-                        <li><a href="{{url_for('showCategory', category = 'Pencils')}}">Pencils</a></li>
-                        <li><a href="{{url_for('showCategory', category = 'Pens')}}">Pens</a></li>
-                        <li><a href="{{url_for('showCategory', category = 'Brushes')}}">Brushes</a></li>
-                        <li><a href="{{url_for('showCategory', category = 'Embellishments')}}">Embellishments</a></li>
-                        <li><a href="{{url_for('showCategory', category = 'Books')}}">Books</a></li>
-                        <li><a href="{{url_for('showCategory', category = 'Sets')}}">Sets</a></li>
-                        <li><a href="{{url_for('showCategory', category = 'Misc')}}">Misc</a></li>
-                    </ul>
+                <div class="col-md-3 page-side category-list list-group">
+                    <a href="{{url_for('showCategory', category = 'Paints')}}" class="list-group-item">Paints</a>
+                    <a href="{{url_for('showCategory', category = 'Canvas')}}" class="list-group-item">Canvas</a>
+                    <a href="{{url_for('showCategory', category = 'Paper')}}" class="list-group-item">Paper</a>
+                    <a href="{{url_for('showCategory', category = 'Pencils')}}" class="list-group-item">Pencils</a>
+                    <a href="{{url_for('showCategory', category = 'Pens')}}" class="list-group-item">Pens</a>
+                    <a href="{{url_for('showCategory', category = 'Brushes')}}" class="list-group-item">Brushes</a>
+                    <a href="{{url_for('showCategory', category = 'Embellishments')}}" class="list-group-item">Embellishments</a>
+                    <a href="{{url_for('showCategory', category = 'Books')}}" class="list-group-item">Books</a>
+                    <a href="{{url_for('showCategory', category = 'Sets')}}" class="list-group-item">Sets</a>
+                    <a href="{{url_for('showCategory', category = 'Misc')}}" class="list-group-item">Misc</a>
                 </div>
                 <div class="col-md-9 page-fill">
                     {% block content %}
