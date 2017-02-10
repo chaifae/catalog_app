@@ -21,7 +21,7 @@ APPLICATION_NAME = 'Catalog Application'
 engine = create_engine('sqlite:///catalogandusers.db')
 Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
-session = DBSession()
+
 
 
 @app.route('/')
@@ -40,6 +40,7 @@ def catalog():
 
 @app.route('/catalog/<string:category>/')
 def showCategory(category):
+    session = DBSession()
     # landing page for the category selected, displays all items in
     # selected category
     # will show slightly different content depending on if user is
@@ -48,6 +49,7 @@ def showCategory(category):
     loggedin = False
     # grab all the items within the category selected
     items = session.query(Item).filter_by(category=category).all()
+    session.close()
     # if username is in login_session, we can assume a user is logged
     # in and pass that info to the template
     if 'username' in login_session:
@@ -60,84 +62,97 @@ def showCategory(category):
 
 @app.route('/catalog/newitem/', methods=['GET', 'POST'])
 def newItem():
-    # check if user is logged in, redirect if not
-    if 'username' not in login_session:
-        return redirect('/login/')
-    # user is logged in, continue to new item page
-    if request.method == 'POST':
-        # grab all the input from the form for the new item
-        newItem = Item(name=request.form['name'],
-                       description=request.form['description'],
-                       price=request.form['price'],
-                       category=request.form['category'],
-                       user_id=login_session['user_id'])
-        session.add(newItem)
-        # flash a message to confirm item creation
-        flash('New item %s successfully created!' % (newItem.name))
-        session.commit()
-        # redirect to the category landing page of the newly created item
-        return redirect(url_for('showCategory', category=newItem.category))
-    else:
-        return render_template('newitem.html')
+    session = DBSession()
+    try:
+        # check if user is logged in, redirect if not
+        if 'username' not in login_session:
+            return redirect('/login/')
+        # user is logged in, continue to new item page
+        if request.method == 'POST':
+            # grab all the input from the form for the new item
+            newItem = Item(name=request.form['name'],
+                        description=request.form['description'],
+                        price=request.form['price'],
+                        category=request.form['category'],
+                        user_id=login_session['user_id'])
+            session.add(newItem)
+            # flash a message to confirm item creation
+            flash('New item %s successfully created!' % (newItem.name))
+            session.commit()
+            # redirect to the category landing page of the newly created item
+            return redirect(url_for('showCategory', category=newItem.category))
+        else:
+            return render_template('newitem.html')
+    finally:
+        session.close()
 
 
 @app.route('/catalog/<int:item_id>/edit/', methods=['GET', 'POST'])
 def editItem(item_id):
-    # check if user is logged in, redirect if not
-    # start by assuming the user is not the authorized creator of the item
-    authorized = False
-    if 'username' not in login_session:
-        return redirect('/login/')
-    # user is logged in so we can continue, grab item by id
-    editedItem = session.query(Item).filter_by(id=item_id).one()
-    # check if user logged in is creator
-    # page will display differently if not
-    if editedItem.user_id == login_session['user_id']:
-        authorized = True
-    if request.method == 'POST':
-        if request.form['name']:
-            editedItem.name = request.form['name']
-        if request.form['description']:
-            editedItem.description = request.form['description']
-        if request.form['price']:
-            editedItem.price = request.form['price']
-        if request.form['category']:
-            editedItem.category = request.form['category']
-        session.add(editedItem)
-        # flash a message to confirm item edit successful
-        flash('%s successfully edited!' % (editedItem.name))
-        session.commit()
-        # redirect to the category landing page of the edited item
-        return redirect(url_for('showCategory', category=editedItem.category))
-    else:
-        return render_template('edititem.html',
-                               item_id=item_id,
-                               item=editedItem,
-                               authorized=authorized)
+    session = DBSession()
+    try:
+        # check if user is logged in, redirect if not
+        # start by assuming the user is not the authorized creator of the item
+        authorized = False
+        if 'username' not in login_session:
+            return redirect('/login/')
+        # user is logged in so we can continue, grab item by id
+        editedItem = session.query(Item).filter_by(id=item_id).one()
+        # check if user logged in is creator
+        # page will display differently if not
+        if editedItem.user_id == login_session['user_id']:
+            authorized = True
+        if request.method == 'POST':
+            if request.form['name']:
+                editedItem.name = request.form['name']
+            if request.form['description']:
+                editedItem.description = request.form['description']
+            if request.form['price']:
+                editedItem.price = request.form['price']
+            if request.form['category']:
+                editedItem.category = request.form['category']
+            session.add(editedItem)
+            # flash a message to confirm item edit successful
+            flash('%s successfully edited!' % (editedItem.name))
+            session.commit()
+            session.close()
+            # redirect to the category landing page of the edited item
+            return redirect(url_for('showCategory', category=editedItem.category))
+        else:
+            return render_template('edititem.html',
+                                item_id=item_id,
+                                item=editedItem,
+                                authorized=authorized)
+    finally:
+        session.close()
 
 
 @app.route('/catalog/<int:item_id>/delete/', methods=['GET', 'POST'])
 def deleteItem(item_id):
-    # check if user is logged in, redirect if not
-    # start by assuming the user is not the authorized creator
-    authorized = False
-    if 'username' not in login_session:
-        return redirect('/login/')
-    # user is logged in, we can continue
-    itemToDelete = session.query(Item).filter_by(id=item_id).one()
-    # check if user logged in is creator, page will display differently if not
-    if itemToDelete.user_id == login_session['user_id']:
-        authorized = True
-    if request.method == 'POST':
-        session.delete(itemToDelete)
-        session.commit()
-        # flash a message to confirm item deletion successful
-        flash('Item successfully deleted.')
-        return redirect(url_for('catalog'))
-    else:
-        return render_template('deleteitem.html',
-                               item=itemToDelete,
-                               authorized=authorized)
+    session = DBSession()
+    try:
+        # check if user is logged in, redirect if not
+        # start by assuming the user is not the authorized creator
+        authorized = False
+        if 'username' not in login_session:
+            return redirect('/login/')
+        # user is logged in, we can continue
+        itemToDelete = session.query(Item).filter_by(id=item_id).one()
+        # check if user logged in is creator, page will display differently if not
+        if itemToDelete.user_id == login_session['user_id']:
+            authorized = True
+        if request.method == 'POST':
+            session.delete(itemToDelete)
+            session.commit()
+            # flash a message to confirm item deletion successful
+            flash('Item successfully deleted.')
+            return redirect(url_for('catalog'))
+        else:
+            return render_template('deleteitem.html',
+                                item=itemToDelete,
+                                authorized=authorized)
+    finally:
+        session.close()
 
 
 @app.route('/login/')
@@ -374,33 +389,42 @@ def disconnect():
 # JSON APIs to view item information
 @app.route('/catalog/JSON/')
 def categoryListJSON():
+    session = DBSession()
     # returns list of categories
     categories = session.query(Item.category).distinct()
+    session.close()
     return jsonify(categories=[c.serialize for c in categories])
 
 
 @app.route('/catalog/items/JSON/')
 def itemsJSON():
+    session = DBSession()
     # returns list of all items
     items = session.query(Item).all()
+    session.close()
     return jsonify(items=[i.serialize for i in items])
 
 
 @app.route('/catalog/<string:category>/items/JSON')
 def itemsByCategoryJSON(category):
+    session = DBSession()
     # returns list of items within the given category
     items = session.query(Item).filter_by(category=category).all()
+    session.close()
     return jsonify(items=[i.serialize for i in items])
 
 
 @app.route('/catalog/items/<int:item_id>/JSON/')
 def itemJSON(item_id):
+    session = DBSession()
     # returns info for a single item
     item = session.query(Item).filter_by(id=item_id).one()
+    session.close()
     return jsonify(item=item.serialize)
 
 
 def getUserID(email):
+    session = DBSession()
     # finds the user's id in the database or returns None
     print "getUserID running..."
     try:
@@ -408,16 +432,21 @@ def getUserID(email):
         return user.id
     except:
         return None
+    finally:
+        session.close()
 
 
 def getUserInfo(user_id):
+    session = DBSession()
     # grabs the rest of the user's info using the user id
     print "getUserInfo running..."
     user = session.query(User).filter_by(id=user_id).one()
+    session.close()
     return user
 
 
 def createUser(login_session):
+    session = DBSession()
     # creates a new user using info from login_session
     print "createUser running..."
     newUser = User(name=login_session['username'],
@@ -428,6 +457,7 @@ def createUser(login_session):
     session.commit()
     # return's the user's id
     user = session.query(User).filter_by(email=login_session['email']).one()
+    session.close()
     return user.id
 
 
