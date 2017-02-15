@@ -12,6 +12,7 @@ import requests
 from database_setup import Base, Item, User
 
 app = Flask(__name__)
+app.secret_key = 'this_is_secret'
 
 CLIENT_ID = json.loads(
     open('/var/www/html/catalog_app/client_secrets.json', 'r').read())['web']['client_id']
@@ -462,6 +463,5 @@ def createUser(login_session):
 
 
 if __name__ == '__main__':
-    app.secret_key = 'this_is_secret'
     app.debug = True
     app.run(host='0.0.0.0', port=5000)
