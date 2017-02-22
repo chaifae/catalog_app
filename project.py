@@ -331,6 +331,7 @@ def fbconnect():
     url = 'https://graph.facebook.com/v2.4/me?%s&fields=name,id,email' % token
     h = httplib2.Http()
     result = h.request(url, 'GET')[1]
+    print "-- flavor -- " + result
     data = json.loads(result)
 
     print data
