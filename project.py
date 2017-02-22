@@ -14,8 +14,14 @@ from database_setup import Base, Item, User
 app = Flask(__name__)
 app.secret_key = 'this_is_secret'
 
-CLIENT_ID = json.loads(
-    open('/var/www/html/catalog_app/client_secrets.json', 'r').read())['web']['client_id']
+client_secrets_path = '/var/www/html/catalog_app/client_secrets.json'
+client_secrets_file = open(client_secrets_path, 'r')
+client_secrets_contents = client_secrets_file.read()
+CLIENT_ID = json.loads(client_secrets_contents)['web']['client_id']
+client_secrets_file.close()
+
+# CLIENT_ID = json.loads(
+#     open('/var/www/html/catalog_app/client_secrets.json', 'r').read())['web']['client_id']
 APPLICATION_NAME = 'Catalog Application'
 
 # connect to the database and create database session
@@ -177,7 +183,7 @@ def gconnect():
 
     try:
         # upgrade the authorization code into a credentials object
-        oauth_flow = flow_from_clientsecrets('client_secrets.json', scope='')
+        oauth_flow = flow_from_clientsecrets(client_secrets_path, scope='')
         oauth_flow.redirect_uri = 'postmessage'
         credentials = oauth_flow.step2_exchange(code)
     except FlowExchangeError:
