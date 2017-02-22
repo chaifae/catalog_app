@@ -48,23 +48,25 @@ def catalog():
 @app.route('/catalog/<string:category>/')
 def showCategory(category):
     session = DBSession()
-    # landing page for the category selected, displays all items in
-    # selected category
-    # will show slightly different content depending on if user is
-    # logged in
-    # start by assuming user not logged in
-    loggedin = False
-    # grab all the items within the category selected
-    items = session.query(Item).filter_by(category=category).all()
-    session.close()
-    # if username is in login_session, we can assume a user is logged
-    # in and pass that info to the template
-    if 'username' in login_session:
-        loggedin = True
-    return render_template('items.html',
-                           items=items,
-                           category=category,
-                           loggedin=loggedin)
+    try:
+        # landing page for the category selected, displays all items in
+        # selected category
+        # will show slightly different content depending on if user is
+        # logged in
+        # start by assuming user not logged in
+        loggedin = False
+        # grab all the items within the category selected
+        items = session.query(Item).filter_by(category=category).all()
+        # if username is in login_session, we can assume a user is logged
+        # in and pass that info to the template
+        if 'username' in login_session:
+            loggedin = True
+        return render_template('items.html',
+                            items=items,
+                            category=category,
+                            loggedin=loggedin)
+    finally:
+        session.close()
 
 
 @app.route('/catalog/newitem/', methods=['GET', 'POST'])
@@ -405,37 +407,45 @@ def disconnect():
 @app.route('/catalog/JSON/')
 def categoryListJSON():
     session = DBSession()
-    # returns list of categories
-    categories = session.query(Item.category).distinct()
-    session.close()
-    return jsonify(categories=[c.serialize for c in categories])
+    try:
+        # returns list of categories
+        categories = session.query(Item.category).distinct()
+        return jsonify(categories=[c.serialize for c in categories])
+    finally:
+        session.close()
 
 
 @app.route('/catalog/items/JSON/')
 def itemsJSON():
     session = DBSession()
-    # returns list of all items
-    items = session.query(Item).all()
-    session.close()
-    return jsonify(items=[i.serialize for i in items])
+    try:
+        # returns list of all items
+        items = session.query(Item).all()
+        return jsonify(items=[i.serialize for i in items])
+    finally:
+        session.close()
 
 
 @app.route('/catalog/<string:category>/items/JSON')
 def itemsByCategoryJSON(category):
     session = DBSession()
-    # returns list of items within the given category
-    items = session.query(Item).filter_by(category=category).all()
-    session.close()
-    return jsonify(items=[i.serialize for i in items])
+    try:
+        # returns list of items within the given category
+        items = session.query(Item).filter_by(category=category).all()
+        return jsonify(items=[i.serialize for i in items])
+    finally:
+        session.close()
 
 
 @app.route('/catalog/items/<int:item_id>/JSON/')
 def itemJSON(item_id):
     session = DBSession()
-    # returns info for a single item
-    item = session.query(Item).filter_by(id=item_id).one()
-    session.close()
-    return jsonify(item=item.serialize)
+    try:
+        # returns info for a single item
+        item = session.query(Item).filter_by(id=item_id).one()
+        return jsonify(item=item.serialize)
+    finally:
+        session.close()
 
 
 def getUserID(email):
@@ -453,27 +463,31 @@ def getUserID(email):
 
 def getUserInfo(user_id):
     session = DBSession()
-    # grabs the rest of the user's info using the user id
-    print "getUserInfo running..."
-    user = session.query(User).filter_by(id=user_id).one()
-    session.close()
-    return user
+    try:
+        # grabs the rest of the user's info using the user id
+        print "getUserInfo running..."
+        user = session.query(User).filter_by(id=user_id).one()
+        return user
+    finally:
+        session.close()
 
 
 def createUser(login_session):
     session = DBSession()
-    # creates a new user using info from login_session
-    print "createUser running..."
-    newUser = User(name=login_session['username'],
-                   email=login_session['email'],
-                   image=login_session['image'])
-    # add the new user to the database
-    session.add(newUser)
-    session.commit()
-    # return's the user's id
-    user = session.query(User).filter_by(email=login_session['email']).one()
-    session.close()
-    return user.id
+    try:
+        # creates a new user using info from login_session
+        print "createUser running..."
+        newUser = User(name=login_session['username'],
+                    email=login_session['email'],
+                    image=login_session['image'])
+        # add the new user to the database
+        session.add(newUser)
+        session.commit()
+        # return's the user's id
+        user = session.query(User).filter_by(email=login_session['email']).one()
+        return user.id
+    finally:
+        session.close()
 
 
 # if __name__ == '__main__':
