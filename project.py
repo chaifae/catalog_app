@@ -183,6 +183,7 @@ def gconnect():
 
     try:
         # upgrade the authorization code into a credentials object
+        print "-- new -- 1"
         oauth_flow = flow_from_clientsecrets(client_secrets_path, scope='')
         oauth_flow.redirect_uri = 'postmessage'
         credentials = oauth_flow.step2_exchange(code)
