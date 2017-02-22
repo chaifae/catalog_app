@@ -201,8 +201,7 @@ def gconnect():
     # check that the access token is valid
     access_token = credentials.access_token
     print "access_token: " + access_token
-    url = ('''https://www.googleapis.com/oauth2/v2/tokeninfo?
-        access_token=%s''' % access_token)
+    url = ("https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=%s" % access_token)
     print "url: " + url
     h = httplib2.Http()
     result_json = h.request(url, 'GET')[1]
@@ -243,7 +242,7 @@ def gconnect():
     login_session['gplus_id'] = gplus_id
 
     # get user info
-    userinfo_url = 'https://www.googleapis.com/oauth2/v2/userinfo'
+    userinfo_url = 'https://www.googleapis.com/oauth2/v1/userinfo'
     params = {'access_token': credentials.access_token, 'alt': 'json'}
     answer = requests.get(userinfo_url, params=params)
     data = answer.json()
