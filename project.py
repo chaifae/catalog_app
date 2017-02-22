@@ -180,6 +180,7 @@ def gconnect():
     # obtain authorization code
     code = request.data
     print "code: " + request.data
+    print "code: " + code
 
     try:
         # upgrade the authorization code into a credentials object
