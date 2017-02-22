@@ -204,7 +204,9 @@ def gconnect():
     url = ('''https://www.googleapis.com/oauth2/v1/tokeninfo?
         access_token=%s''' % access_token)
     h = httplib2.Http()
-    result = json.loads(h.request(url, 'GET')[1])
+    result_json = h.request(url, 'GET')[1]
+    print "-- new -- 6 " + result_json
+    result = json.loads(result_json)
     # if there was an error in the access token info, abort
     if result.get('error') is not None:
         response = make_response(json.dumps(result.get('error')), 500)
