@@ -124,7 +124,6 @@ def editItem(item_id):
             # flash a message to confirm item edit successful
             flash('%s successfully edited!' % (editedItem.name))
             session.commit()
-            session.close()
             # redirect to the category landing page of the edited item
             return redirect(url_for('showCategory', category=editedItem.category))
         else:
