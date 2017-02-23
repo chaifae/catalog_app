@@ -20,8 +20,6 @@ client_secrets_contents = client_secrets_file.read()
 CLIENT_ID = json.loads(client_secrets_contents)['web']['client_id']
 client_secrets_file.close()
 
-# CLIENT_ID = json.loads(
-#     open('/var/www/html/catalog_app/client_secrets.json', 'r').read())['web']['client_id']
 APPLICATION_NAME = 'Catalog Application'
 
 # connect to the database and create database session
@@ -47,6 +45,7 @@ def catalog():
 
 @app.route('/catalog/<string:category>/')
 def showCategory(category):
+    # open a session to be used for this route on this thread
     session = DBSession()
     try:
         # landing page for the category selected, displays all items in
@@ -66,11 +65,13 @@ def showCategory(category):
                             category=category,
                             loggedin=loggedin)
     finally:
+        # clean up
         session.close()
 
 
 @app.route('/catalog/newitem/', methods=['GET', 'POST'])
 def newItem():
+    # open a session to be used for this route on this thread
     session = DBSession()
     try:
         # check if user is logged in, redirect if not
@@ -93,11 +94,13 @@ def newItem():
         else:
             return render_template('newitem.html')
     finally:
+        # clean up
         session.close()
 
 
 @app.route('/catalog/<int:item_id>/edit/', methods=['GET', 'POST'])
 def editItem(item_id):
+    # open a session to be used for this route on this thread
     session = DBSession()
     try:
         # check if user is logged in, redirect if not
@@ -132,11 +135,13 @@ def editItem(item_id):
                                 item=editedItem,
                                 authorized=authorized)
     finally:
+        # clean up
         session.close()
 
 
 @app.route('/catalog/<int:item_id>/delete/', methods=['GET', 'POST'])
 def deleteItem(item_id):
+    # open a session to be used for this route on this thread
     session = DBSession()
     try:
         # check if user is logged in, redirect if not
@@ -160,6 +165,7 @@ def deleteItem(item_id):
                                 item=itemToDelete,
                                 authorized=authorized)
     finally:
+        # clean up
         session.close()
 
 
@@ -180,20 +186,14 @@ def gconnect():
         return response
     # obtain authorization code
     code = request.data
-    print "code: " + request.data
     print "code: " + code
 
     try:
         # upgrade the authorization code into a credentials object
-        print "-- new -- 1"
         oauth_flow = flow_from_clientsecrets(client_secrets_path, scope='')
-        print "-- new -- 2"
         oauth_flow.redirect_uri = 'postmessage'
-        print "-- new -- 3"
         credentials = oauth_flow.step2_exchange(code)
-        print "-- new -- 4"
     except FlowExchangeError as err:
-        print "-- new -- 5" + err.message
         response = make_response(json.dumps(
             'Failed to upgrade to authorization code'), 401)
         response.headers['Conent-Type'] = 'application/json'
@@ -203,10 +203,8 @@ def gconnect():
     access_token = credentials.access_token
     print "access_token: " + access_token
     url = ("https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=%s" % access_token)
-    print "url: " + url
     h = httplib2.Http()
     result_json = h.request(url, 'GET')[1]
-    print "-- new -- 6 " + result_json
     result = json.loads(result_json)
     # if there was an error in the access token info, abort
     if result.get('error') is not None:
@@ -329,10 +327,8 @@ def fbconnect():
     url = 'https://graph.facebook.com/v2.4/me?%s&fields=name,id,email' % token
     h = httplib2.Http()
     result = h.request(url, 'GET')[1]
-    print "-- flavor -- " + result
     data = json.loads(result)
 
-    print data
     login_session['provider'] = 'facebook'
     login_session['username'] = data['name']
     login_session['email'] = data['email']
@@ -402,49 +398,58 @@ def disconnect():
 # JSON APIs to view item information
 @app.route('/catalog/JSON/')
 def categoryListJSON():
+    # open a session to be used for this route on this thread
     session = DBSession()
     try:
         # returns list of categories
         categories = session.query(Item.category).distinct()
         return jsonify(categories=[c.serialize for c in categories])
     finally:
+        # clean up
         session.close()
 
 
 @app.route('/catalog/items/JSON/')
 def itemsJSON():
+    # open a session to be used for this route on this thread
     session = DBSession()
     try:
         # returns list of all items
         items = session.query(Item).all()
         return jsonify(items=[i.serialize for i in items])
     finally:
+        # clean up
         session.close()
 
 
 @app.route('/catalog/<string:category>/items/JSON')
 def itemsByCategoryJSON(category):
+    # open a session to be used for this route on this thread
     session = DBSession()
     try:
         # returns list of items within the given category
         items = session.query(Item).filter_by(category=category).all()
         return jsonify(items=[i.serialize for i in items])
     finally:
+        # clean up
         session.close()
 
 
 @app.route('/catalog/items/<int:item_id>/JSON/')
 def itemJSON(item_id):
+    # open a session to be used for this route on this thread
     session = DBSession()
     try:
         # returns info for a single item
         item = session.query(Item).filter_by(id=item_id).one()
         return jsonify(item=item.serialize)
     finally:
+        # clean up
         session.close()
 
 
 def getUserID(email):
+    # open a session to be used for this route on this thread
     session = DBSession()
     # finds the user's id in the database or returns None
     print "getUserID running..."
@@ -454,10 +459,12 @@ def getUserID(email):
     except:
         return None
     finally:
+        # clean up
         session.close()
 
 
 def getUserInfo(user_id):
+    # open a session to be used for this route on this thread
     session = DBSession()
     try:
         # grabs the rest of the user's info using the user id
@@ -465,10 +472,12 @@ def getUserInfo(user_id):
         user = session.query(User).filter_by(id=user_id).one()
         return user
     finally:
+        # clean up
         session.close()
 
 
 def createUser(login_session):
+    # open a session to be used for this route on this thread
     session = DBSession()
     try:
         # creates a new user using info from login_session
@@ -483,9 +492,5 @@ def createUser(login_session):
         user = session.query(User).filter_by(email=login_session['email']).one()
         return user.id
     finally:
+        # clean up
         session.close()
-
-
-# if __name__ == '__main__':
-#     app.debug = True
-#     app.run(host='0.0.0.0', port=5000)
