@@ -2,18 +2,20 @@
 
 This app is a web-based catalog that shows items in a variety of categories. It also has a secure user registration and authentication system. User can read items from a database, while registered users can also create, edit, and delete items.
 
-###Prerequisites
-
-To run the app locally you will need to have vagrant. Get started [here](https://www.vagrantup.com/)
-
-###Downloading the Project
-
-Clone from Git, [here](https://github.com/chaifae/catalog_app).
-
-###Getting Started
-
-Boot up vagrant, ssh in, and get into the directory that you downloaded the app into. From here, run _python project.py_ and open _localhost:5000_ in your browser.
-
 ###How to Use
 
-You don't have to register to view the catalog, simply click on the category you wish to browse. Create an account by logging in with either facebook or google. Once logged in you can also create a new item by clicking on the create item button, and also edit and delete items that you have created, by clicking on the edit or delete links under the item description.
+The app is currently being hosted [here](http://ec2-35-164-186-33.us-west-2.compute.amazonaws.com). You don't have to register to view the catalog, simply click on the category you wish to browse. Create an account by logging in with either facebook or google. Once logged in you can also create a new item by clicking on the create item button, and edit and delete items that you have created by clicking on the edit or delete links under the item description.
+
+###General Info
+
+IP: 35.164.186.33
+SSH: 2200
+URL: http://ec2-35-164-186-33.us-west-2.compute.amazonaws.com
+
+###Configuration Summary
+
+- Utilized development instance from Udacity
+
+###Resources Used
+
+list of resources used to complete the project
